@@ -1,0 +1,368 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Header Styles */
+header {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+header h1 {
+  font-size: 3rem;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+header p {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Main Container */
+.horoscope-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Card Styles */
+.horoscope-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.horoscope-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.horoscope-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+/* Card Header */
+.card-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.card-header h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.date-range {
+  font-size: 0.9rem;
+  color: #666;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+/* Image Container */
+.image-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.horoscope-image {
+  width: 100%;
+  max-width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px;
+  border: 3px solid #f0f0f0;
+  transition: transform 0.3s ease;
+}
+
+.horoscope-image:hover {
+  transform: scale(1.05);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.voice-btn,
+.story-btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-btn {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.voice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.story-btn {
+  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  color: white;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+}
+
+.story-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+}
+
+.voice-btn:active,
+.story-btn:active {
+  transform: translateY(0);
+}
+
+/* Placement Info */
+.placement-info {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #667eea;
+}
+
+.placement-info h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.placement-info p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Story Text */
+.story-text {
+  background: linear-gradient(135deg, #667eea10, #764ba210);
+  padding: 1.5rem;
+  border-radius: 15px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.story-text h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.story-text p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.story-text.hidden {
+  display: none;
+}
+
+.story-text.show {
+  display: block;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .horoscope-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  header h1 {
+    font-size: 2.5rem;
+  }
+
+  header p {
+    font-size: 1rem;
+  }
+
+  .horoscope-card {
+    padding: 1rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .voice-btn,
+  .story-btn {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 1.5rem 1rem;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  .horoscope-container {
+    padding: 0.5rem;
+  }
+
+  .horoscope-card {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  .card-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .horoscope-image {
+    max-width: 150px;
+    height: 150px;
+  }
+}
+
+/* Loading Animation */
+.horoscope-card {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animation for cards */
+.horoscope-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.horoscope-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.horoscope-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.horoscope-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.horoscope-card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.horoscope-card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+.horoscope-card:nth-child(7) {
+  animation-delay: 0.7s;
+}
+.horoscope-card:nth-child(8) {
+  animation-delay: 0.8s;
+}
+.horoscope-card:nth-child(9) {
+  animation-delay: 0.9s;
+}
+.horoscope-card:nth-child(10) {
+  animation-delay: 1s;
+}
+.horoscope-card:nth-child(11) {
+  animation-delay: 1.1s;
+}
+.horoscope-card:nth-child(12) {
+  animation-delay: 1.2s;
+}
+
+/* Button States */
+.voice-btn.playing {
+  background: linear-gradient(45deg, #ff9500, #ff6b6b);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.story-btn.active {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+}
