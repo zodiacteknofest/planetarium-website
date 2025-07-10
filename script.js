@@ -2,7 +2,6 @@
 class HoroscopeApp {
   constructor() {
     this.currentSpeaking = null;
-    this.speechSynthesis = window.speechSynthesis;
     this.voiceMap = this.createVoiceMap();
     this.init();
   }
@@ -10,13 +9,32 @@ class HoroscopeApp {
   init() {
     this.setupEventListeners();
     this.setupInitialState();
-    this.loadVoices();
   }
 
   createVoiceMap() {
     return {
-      scorpio: "vid/AkrepBilgi.mp4", // Your actual Scorpio info audio
-      // Add more voice mappings as needed
+      // Zodiac signs with their Turkish audio files
+      aries: ["sound/koc1.mp3", "sound/koc2.mp3"],
+      taurus: ["sound/boga.mp3"],
+      gemini: ["sound/ikizler1.mp3", "sound/ikizler2.mp3"],
+      cancer: ["sound/yengec1.mp3", "sound/yengec2.mp3"],
+      leo: [], // No audio file available, will use text-to-speech
+      virgo: ["sound/basak1.mp3", "sound/basak2.mp3"],
+      libra: ["sound/terazi.mp3"],
+      scorpio: ["sound/akrep1.mp3", "sound/akrep2.mp3"],
+      sagittarius: [], // No audio file available, will use text-to-speech
+      capricorn: ["sound/oglak.mp3"],
+      aquarius: ["sound/kova1.mp3", "sound/kova2.mp3"],
+      pisces: ["sound/balik.mp3"],
+      // Other constellations
+      orion: ["sound/orion.mp3"],
+      aguila: ["sound/kartal1.mp3", "sound/kartal2.mp3"],
+      lyra: ["sound/lir.mp3"],
+      cygnus: ["sound/kugu1.mp3", "sound/kugu2.mp3"],
+      "ursa-major": ["sound/buyukayi1.mp3", "sound/buyukayi2.mp3"],
+      "ursa-minor": ["sound/kucukayi1.mp3", "sound/kucukayi2.mp3"],
+      perseus: ["sound/perseus1.mp3", "sound/perseus2.mp3"],
+      andromeda: ["sound/andromeda.mp3"],
     };
   }
 
@@ -51,46 +69,36 @@ class HoroscopeApp {
   }
 
   setupInitialState() {
-    // Hide all story texts initially
-    document.querySelectorAll(".story-text").forEach((story) => {
-      story.classList.add("hidden");
+    // Hide all constellation info initially
+    document.querySelectorAll(".constellation-info").forEach((info) => {
+      info.classList.add("hidden");
     });
-  }
-
-  loadVoices() {
-    // Load available voices for text-to-speech
-    if (this.speechSynthesis.onvoiceschanged !== undefined) {
-      this.speechSynthesis.onvoiceschanged = () => {
-        this.voices = this.speechSynthesis.getVoices();
-      };
-    }
-    this.voices = this.speechSynthesis.getVoices();
   }
 
   toggleStory(button) {
     const sign = button.getAttribute("data-sign");
     const card = button.closest(".horoscope-card");
-    const storyText = card.querySelector(".story-text");
+    const constellationInfo = card.querySelector(".constellation-info");
 
-    if (storyText.classList.contains("hidden")) {
-      // Show story
-      storyText.classList.remove("hidden");
-      storyText.classList.add("show");
-      button.textContent = "🔼 Hikayeyi Gizle";
+    if (constellationInfo.classList.contains("hidden")) {
+      // Show constellation info
+      constellationInfo.classList.remove("hidden");
+      constellationInfo.classList.add("show");
+      button.textContent = "🔼 Bilgileri Gizle";
       button.classList.add("active");
 
-      // Smooth scroll to story
+      // Smooth scroll to info
       setTimeout(() => {
-        storyText.scrollIntoView({
+        constellationInfo.scrollIntoView({
           behavior: "smooth",
           block: "nearest",
         });
       }, 100);
     } else {
-      // Hide story
-      storyText.classList.add("hidden");
-      storyText.classList.remove("show");
-      button.textContent = "📖 Hikaye";
+      // Hide constellation info
+      constellationInfo.classList.add("hidden");
+      constellationInfo.classList.remove("show");
+      button.textContent = "📖 Bilgiler";
       button.classList.remove("active");
     }
   }
@@ -98,112 +106,110 @@ class HoroscopeApp {
   async playVoice(button) {
     const sign = button.getAttribute("data-sign");
 
-    // Stop any current speech
-    this.stopSpeech();
+    // If already playing, stop it
+    if (button.classList.contains("playing")) {
+      this.stopAudio();
+      return;
+    }
 
-    // Check if we have a custom audio file for this sign
-    if (this.voiceMap[sign]) {
+    // Stop any other current audio
+    this.stopAudio();
+
+    // Check if we have audio files for this sign
+    if (this.voiceMap[sign] && this.voiceMap[sign].length > 0) {
       await this.playCustomAudio(sign, button);
     } else {
-      // Use text-to-speech for the story
-      this.speakText(sign, button);
+      // No audio available for this constellation
+      console.log(`No audio file available for ${sign}`);
+      button.textContent = "❌ Ses Yok";
+      setTimeout(() => {
+        button.textContent = "🔊 Sesli";
+      }, 2000);
     }
   }
 
   async playCustomAudio(sign, button) {
     try {
-      // For Scorpio, try to play the actual audio file
-      if (sign === "scorpio") {
-        const audio = new Audio(this.voiceMap[sign]);
+      const audioFiles = this.voiceMap[sign];
+      if (!audioFiles || audioFiles.length === 0) {
+        console.log(`No audio files for ${sign}`);
+        return;
+      }
 
-        button.textContent = "🔊 Çalıyor...";
-        button.classList.add("playing");
+      // Set button to playing state
+      button.textContent = "⏸️ Durdur";
+      button.classList.add("playing");
+
+      // Play audio files sequentially
+      await this.playAudioSequentially(audioFiles, button);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      this.resetVoiceButton(button);
+    }
+  }
+
+  async playAudioSequentially(audioFiles, button) {
+    for (let i = 0; i < audioFiles.length; i++) {
+      // Check if playback was stopped
+      if (!button.classList.contains("playing")) {
+        return;
+      }
+
+      const audioFile = audioFiles[i];
+
+      try {
+        // Create audio element
+        const audioElement = new Audio(audioFile);
+        audioElement.preload = "auto";
+
+        // Store current playing element
         this.currentSpeaking = {
           type: "audio",
-          element: audio,
+          element: audioElement,
           button: button,
         };
 
-        audio.onended = () => {
-          this.resetVoiceButton(button);
-        };
+        // Create promise to wait for audio to finish
+        const playPromise = new Promise((resolve, reject) => {
+          audioElement.addEventListener("ended", () => {
+            resolve();
+          });
 
-        audio.onerror = () => {
-          console.log("Audio file not found, using text-to-speech instead");
-          this.speakText(sign, button);
-        };
+          audioElement.addEventListener("error", (e) => {
+            console.error(`Error playing audio file ${audioFile}:`, e);
+            reject(e);
+          });
+        });
 
-        await audio.play();
+        // Start playing
+        await audioElement.play();
+
+        // Wait for this audio to finish before playing next
+        await playPromise;
+
+        // Check again if playback was stopped during playback
+        if (!button.classList.contains("playing")) {
+          return;
+        }
+
+        // Small pause between audio files (if there are more to play)
+        if (i < audioFiles.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      } catch (error) {
+        console.error(`Error playing audio file ${audioFile}:`, error);
+        // Continue to next file if one fails
+        continue;
       }
-    } catch (error) {
-      console.log("Error playing audio:", error);
-      // Fallback to text-to-speech
-      this.speakText(sign, button);
     }
+
+    // Reset button when all audio files are done
+    this.resetVoiceButton(button);
   }
 
-  speakText(sign, button) {
-    const card = button.closest(".horoscope-card");
-    const storyText = card.querySelector(".story-text p");
-    const placementText = card.querySelector(".placement-info p");
-
-    // Combine placement info and story for speech in Turkish
-    const textToSpeak = `${sign} burcu. ${placementText.textContent} ${storyText.textContent}`;
-
-    if (this.speechSynthesis && textToSpeak) {
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-
-      // Configure voice for Turkish
-      if (this.voices && this.voices.length > 0) {
-        // Try to find a good Turkish voice, fall back to other languages
-        const preferredVoice =
-          this.voices.find(
-            (voice) =>
-              voice.lang.includes("tr") && voice.name.includes("Female")
-          ) ||
-          this.voices.find((voice) => voice.lang.includes("tr")) ||
-          this.voices.find(
-            (voice) =>
-              voice.lang.includes("en") && voice.name.includes("Female")
-          ) ||
-          this.voices.find((voice) => voice.lang.includes("en")) ||
-          this.voices[0];
-
-        utterance.voice = preferredVoice;
-      }
-
-      utterance.rate = 0.9;
-      utterance.pitch = 1.1;
-      utterance.volume = 0.8;
-
-      utterance.onstart = () => {
-        button.textContent = "🔊 Konuşuyor...";
-        button.classList.add("playing");
-      };
-
-      utterance.onend = () => {
-        this.resetVoiceButton(button);
-      };
-
-      utterance.onerror = () => {
-        this.resetVoiceButton(button);
-        console.log("Speech synthesis error");
-      };
-
-      this.currentSpeaking = {
-        type: "speech",
-        element: utterance,
-        button: button,
-      };
-      this.speechSynthesis.speak(utterance);
-    }
-  }
-
-  stopSpeech() {
+  stopAudio() {
     if (this.currentSpeaking) {
-      if (this.currentSpeaking.type === "speech") {
-        this.speechSynthesis.cancel();
-      } else if (this.currentSpeaking.type === "audio") {
+      if (this.currentSpeaking.type === "audio") {
         this.currentSpeaking.element.pause();
         this.currentSpeaking.element.currentTime = 0;
       }
@@ -973,12 +979,20 @@ style.textContent = `
     
     /* Responsive fullscreen */
     @media (max-width: 768px) {
+        .fullscreen-overlay {
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+        
         .fullscreen-close {
             top: -30px;
             right: -10px;
             width: 35px;
             height: 35px;
             font-size: 16px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.6);
         }
         
         .fullscreen-image {
@@ -986,24 +1000,38 @@ style.textContent = `
             max-height: 75vh;
             border-radius: 15px;
             border-width: 3px;
+            border-color: rgba(147, 112, 219, 0.8);
+        }
+        
+        .fullscreen-info {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .fullscreen-info h3 {
             font-size: 1.2rem;
+            color: #fff;
         }
         
         .fullscreen-info p {
             font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
         }
     }
     
     @media (max-width: 480px) {
+        .fullscreen-overlay {
+            background: rgba(0, 0, 0, 0.99);
+        }
+        
         .fullscreen-close {
             top: -25px;
             right: -5px;
             width: 30px;
             height: 30px;
             font-size: 14px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.7);
         }
         
         .fullscreen-image {
@@ -1011,23 +1039,27 @@ style.textContent = `
             max-height: 80vh;
             border-radius: 12px;
             border-width: 2px;
+            border-color: rgba(147, 112, 219, 1);
         }
         
         .fullscreen-info {
             padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
         
         .fullscreen-info h3 {
             font-size: 1.1rem;
+            color: #fff;
         }
         
         .fullscreen-info p {
             font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.95);
         }
     }
 `;
 document.head.appendChild(style);
-
 // Add occasional shooting stars
 function createShootingStar() {
   const star = document.createElement("div");
